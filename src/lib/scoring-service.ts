@@ -81,7 +81,10 @@ interface MemoryStore {
   }>;
 }
 
-const LOCAL_STORE_FILE = path.join(process.cwd(), ".local-scores.json");
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const LOCAL_STORE_FILE = isServerless
+  ? path.join("/tmp", ".local-scores.json")
+  : path.join(process.cwd(), ".local-scores.json");
 
 const memoryStore: MemoryStore = {
   users: DEFAULT_USERS.map((u) => ({
@@ -111,6 +114,7 @@ const memoryStore: MemoryStore = {
 };
 
 function saveScoresToDisk() {
+  if (isServerless) return;
   try {
     const serialized = Array.from(memoryStore.scores.entries()).map(([k, v]) => ({
       key: k,
@@ -118,12 +122,15 @@ function saveScoresToDisk() {
       updatedAt: v.updatedAt.toISOString(),
     }));
     fs.writeFileSync(LOCAL_STORE_FILE, JSON.stringify(serialized, null, 2), "utf-8");
-  } catch (err) {
-    console.warn("Could not save local scores to disk:", err);
+  } catch (err: any) {
+    if (err?.code !== "EROFS") {
+      console.warn("Could not save local scores to disk:", err?.message || err);
+    }
   }
 }
 
 function loadScoresFromDisk(): boolean {
+  if (isServerless) return false;
   try {
     if (fs.existsSync(LOCAL_STORE_FILE)) {
       const content = fs.readFileSync(LOCAL_STORE_FILE, "utf-8");
@@ -144,8 +151,8 @@ function loadScoresFromDisk(): boolean {
         return true;
       }
     }
-  } catch (err) {
-    console.warn("Could not load local scores from disk:", err);
+  } catch {
+    // Ignore read errors
   }
   return false;
 }
@@ -169,12 +176,14 @@ export async function resetAllScores(): Promise<{ count: number }> {
   }
 
   memoryStore.scores.clear();
-  try {
-    if (fs.existsSync(LOCAL_STORE_FILE)) {
-      fs.writeFileSync(LOCAL_STORE_FILE, "[]", "utf-8");
+  if (!isServerless) {
+    try {
+      if (fs.existsSync(LOCAL_STORE_FILE)) {
+        fs.writeFileSync(LOCAL_STORE_FILE, "[]", "utf-8");
+      }
+    } catch (err) {
+      console.warn("Could not empty local store file:", err);
     }
-  } catch (err) {
-    console.warn("Could not empty local store file:", err);
   }
 
   return { count };
@@ -399,55 +408,61 @@ export async function saveJudgeScore(params: {
 
   if (isPrismaConfigured()) {
     try {
-      await prisma.$transaction(async (tx) => {
-        // Upsert Score
-        const score = await tx.score.upsert({
+      // Upsert Score directly (PgBouncer pooler compatible)
+      const score = await prisma.score.upsert({
+        where: {
+          teamId_userId: {
+            teamId,
+            userId: judgeId,
+          },
+        },
+        update: {
+          totalWeightedScore: finalWeightedTotal,
+          comment,
+        },
+        create: {
+          teamId,
+          userId: judgeId,
+          totalWeightedScore: finalWeightedTotal,
+          comment,
+        },
+      });
+
+      // Upsert Details sequentially (PgBouncer pooler compatible)
+      for (const detail of detailsToSave) {
+        await prisma.scoreDetail.upsert({
           where: {
-            teamId_userId: {
-              teamId,
-              userId: judgeId,
+            scoreId_criterionId: {
+              scoreId: score.id,
+              criterionId: detail.criterionId,
             },
           },
           update: {
-            totalWeightedScore: finalWeightedTotal,
-            comment,
+            rawScore: detail.rawScore,
+            weightedScore: detail.weightedScore,
+            comment: detail.comment,
           },
           create: {
-            teamId,
-            userId: judgeId,
-            totalWeightedScore: finalWeightedTotal,
-            comment,
+            scoreId: score.id,
+            criterionId: detail.criterionId,
+            rawScore: detail.rawScore,
+            weightedScore: detail.weightedScore,
+            comment: detail.comment,
           },
         });
-
-        // Upsert Details
-        for (const detail of detailsToSave) {
-          await tx.scoreDetail.upsert({
-            where: {
-              scoreId_criterionId: {
-                scoreId: score.id,
-                criterionId: detail.criterionId,
-              },
-            },
-            update: {
-              rawScore: detail.rawScore,
-              weightedScore: detail.weightedScore,
-              comment: detail.comment,
-            },
-            create: {
-              scoreId: score.id,
-              criterionId: detail.criterionId,
-              rawScore: detail.rawScore,
-              weightedScore: detail.weightedScore,
-              comment: detail.comment,
-            },
-          });
-        }
-      });
+      }
 
       return { success: true, totalWeightedScore: finalWeightedTotal };
-    } catch (err) {
-      console.warn("Prisma save failed, writing to memory store:", err);
+    } catch (err: any) {
+      console.error("Prisma save failed on Supabase:", err);
+      if (process.env.NODE_ENV === "production" || isServerless) {
+        throw new Error(`Gagal menyimpan ke database Supabase: ${err?.message || "Koneksi database bermasalah"}`);
+      }
+    }
+  } else {
+    console.warn("DATABASE_URL is not configured in environment variables!");
+    if (process.env.NODE_ENV === "production" || isServerless) {
+      throw new Error("DATABASE_URL belum dikonfigurasi di Environment Variables Vercel. Silakan tambahkan DATABASE_URL pada dashboard Vercel.");
     }
   }
 

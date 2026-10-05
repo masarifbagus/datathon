@@ -65,13 +65,13 @@ export function Navbar({ session }: NavbarProps) {
                 </span>
               </div>
 
-              {session.role === "judge" && (
+              {/* {session.role === "judge" && (
                 <Link href="/judge">
                   <Button size="sm" variant="outline" className="text-xs h-8">
                     Lembar Nilai
                   </Button>
                 </Link>
-              )}
+              )} */}
 
               {/* {session.role === "admin" && (
                 <Link href="/admin">
