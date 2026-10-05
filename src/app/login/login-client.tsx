@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, ArrowRight, User, Lock, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
-const QUICK_JUDGE_USERNAMES = ["juri1", "juri2", "juri3", "juri4"];
+const QUICK_JUDGE_USERNAMES = ["KemenpanRB", "KSP", "Tanoto Foundation", "LAN"];
 
 export function LoginClient() {
   const router = useRouter();
@@ -123,13 +123,13 @@ export function LoginClient() {
               autoCorrect="off"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Contoh: juri1, juri2, juri3, juri4"
+              placeholder="Contoh: KemenpanRB, KSP, Tanoto Foundation, LAN"
               className="w-full py-2 px-3 text-sm font-mono rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 dark:focus:border-white transition-colors"
             />
           </div>
 
           {/* Quick Choice Chips */}
-          <div className="flex items-center gap-1.5 pt-0.5">
+          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
             <span className="text-[10px] text-neutral-400 font-mono">Pilih cepat:</span>
             {QUICK_JUDGE_USERNAMES.map((u) => (
               <button
@@ -137,7 +137,7 @@ export function LoginClient() {
                 type="button"
                 onClick={() => handleSelectQuick(u)}
                 className={`text-[11px] font-mono px-2 py-0.5 rounded border transition-colors cursor-pointer ${
-                  username.toLowerCase() === u
+                  username.toLowerCase() === u.toLowerCase()
                     ? "border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-900 font-bold"
                     : "border-neutral-200 dark:border-neutral-800 text-neutral-500 hover:border-neutral-400"
                 }`}

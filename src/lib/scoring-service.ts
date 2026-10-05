@@ -262,10 +262,16 @@ export async function getUsers(): Promise<UserItem[]> {
 }
 
 export async function getUserByUsername(username: string): Promise<UserItem | null> {
+  const clean = username.trim();
   if (isPrismaConfigured()) {
     try {
-      const u = await prisma.user.findUnique({
-        where: { username },
+      const u = await prisma.user.findFirst({
+        where: {
+          username: {
+            equals: clean,
+            mode: "insensitive",
+          },
+        },
       });
       if (u) {
         return {
@@ -280,7 +286,7 @@ export async function getUserByUsername(username: string): Promise<UserItem | nu
       console.warn("Prisma query failed, checking memory store:", err);
     }
   }
-  const found = memoryStore.users.find((u) => u.username.toLowerCase() === username.toLowerCase());
+  const found = memoryStore.users.find((u) => u.username.toLowerCase() === clean.toLowerCase());
   return found ? { ...found } : null;
 }
 

@@ -10,7 +10,7 @@ export async function loginWithCredentialsAction(params: {
   password?: string;
   expectedRole?: "judge" | "admin";
 }) {
-  const cleanUsername = params.username.trim().toLowerCase();
+  const cleanUsername = params.username.trim();
   const password = params.password?.trim() || "";
 
   if (!cleanUsername) {
@@ -48,7 +48,12 @@ export async function loginWithCredentialsAction(params: {
     }
   } else {
     const judgePass = process.env.JUDGE_PASSWORD || "juri123";
-    if (password && password !== judgePass && password !== cleanUsername) {
+    if (
+      password &&
+      password !== judgePass &&
+      password.toLowerCase() !== cleanUsername.toLowerCase() &&
+      password.toLowerCase() !== user.username.toLowerCase()
+    ) {
       return { success: false, error: "Password juri salah (Default: juri123)." };
     }
   }
