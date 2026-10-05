@@ -1,0 +1,86 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  name      String
+  role      String   // 'judge' | 'admin'
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  scores    Score[]
+
+  @@map("users")
+}
+
+model Team {
+  id          String   @id @default(cuid())
+  orderNo     Int      @unique
+  name        String
+  leadName    String?
+  institution String?  @default("LAN RI")
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  scores      Score[]
+
+  @@map("teams")
+}
+
+model Criterion {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  weight      Float    // 0.10, 0.25, etc.
+  order       Int
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  scoreDetails ScoreDetail[]
+
+  @@map("criteria")
+}
+
+model Score {
+  id                 String   @id @default(cuid())
+  teamId             String
+  userId             String
+  totalWeightedScore Float    @default(0)
+  comment            String?  @db.Text
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  team               Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  details            ScoreDetail[]
+
+  @@unique([teamId, userId])
+  @@map("scores")
+}
+
+model ScoreDetail {
+  id            String    @id @default(cuid())
+  scoreId       String
+  criterionId   String
+  rawScore      Float     // 0 - 100
+  weightedScore Float     // rawScore * weight
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  scoreRecord   Score     @relation(fields: [scoreId], references: [id], onDelete: Cascade)
+  criterion     Criterion @relation(fields: [criterionId], references: [id], onDelete: Cascade)
+
+  @@unique([scoreId, criterionId])
+  @@map("score_details")
+}
