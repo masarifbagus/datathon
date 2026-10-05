@@ -152,82 +152,33 @@ function loadScoresFromDisk(): boolean {
 
 // Initialize scores from disk, or seed initial sample if first run
 function initializeSampleScores() {
-  if (loadScoresFromDisk()) {
-    return;
-  }
-
-  if (memoryStore.scores.size === 0) {
-    const t1 = memoryStore.teams[0].id;
-    const j1 = memoryStore.users.find((u) => u.username === "juri1")!.id;
-    const j2 = memoryStore.users.find((u) => u.username === "juri2")!.id;
-
-    // Juri 1 for Simpul Desa
-    const j1Scores = [
-      { code: "relevansi", raw: 90, comment: "Sangat relevan dengan isu tata kelola data pemerintahan desa saat ini." },
-      { code: "inovasi", raw: 88, comment: "Pendekatan orisinal berbasis bottom-up data collector." },
-      { code: "teknologi", raw: 92, comment: "Arsitektur cloud serverless efisien dan prototype berjalan tanpa kendala." },
-      { code: "dampak", raw: 95, comment: "Dampak langsung terukur untuk efisiensi alokasi dana desa." },
-      { code: "presentasi", raw: 85, comment: "Penyampaian runtut dan penguasaan materi tim sangat baik." },
-    ];
-    let j1Total = 0;
-    const j1Details = j1Scores.map((s) => {
-      const crit = memoryStore.criteria.find((c) => c.code === s.code)!;
-      const weighted = Number((s.raw * crit.weight).toFixed(2));
-      j1Total += weighted;
-      return {
-        criterionId: crit.id,
-        rawScore: s.raw,
-        weightedScore: weighted,
-        comment: s.comment,
-      };
-    });
-
-    memoryStore.scores.set(`${t1}_${j1}`, {
-      id: `score_${t1}_${j1}`,
-      teamId: t1,
-      userId: j1,
-      totalWeightedScore: Number(j1Total.toFixed(2)),
-      comment: "Inovasi sangat aplikatif untuk tata kelola pemerintahan desa. Penyampaian terstruktur dan prototype berjalan lancar.",
-      updatedAt: new Date(),
-      details: j1Details,
-    });
-
-    // Juri 2 for Simpul Desa
-    const j2Scores = [
-      { code: "relevansi", raw: 88, comment: "Kebutuhan pemda terjawab dengan baik melalui modul analitik." },
-      { code: "inovasi", raw: 85, comment: "Perlu diferensiasi lebih kuat dibanding sistem eksisting." },
-      { code: "teknologi", raw: 90, comment: "Fungsionalitas dashboard rapi, performa responsif." },
-      { code: "dampak", raw: 92, comment: "Potensi replikasi tinggi ke seluruh kabupaten/kota." },
-      { code: "presentasi", raw: 88, comment: "Tanya jawab dijawab dengan lugas dan berbasis data konkret." },
-    ];
-    let j2Total = 0;
-    const j2Details = j2Scores.map((s) => {
-      const crit = memoryStore.criteria.find((c) => c.code === s.code)!;
-      const weighted = Number((s.raw * crit.weight).toFixed(2));
-      j2Total += weighted;
-      return {
-        criterionId: crit.id,
-        rawScore: s.raw,
-        weightedScore: weighted,
-        comment: s.comment,
-      };
-    });
-
-    memoryStore.scores.set(`${t1}_${j2}`, {
-      id: `score_${t1}_${j2}`,
-      teamId: t1,
-      userId: j2,
-      totalWeightedScore: Number(j2Total.toFixed(2)),
-      comment: "Potensi replikasi tinggi ke seluruh kabupaten/kota. Perhatikan skalabilitas integrasi data.",
-      updatedAt: new Date(),
-      details: j2Details,
-    });
-
-    saveScoresToDisk();
-  }
+  loadScoresFromDisk();
 }
 
 initializeSampleScores();
+
+export async function resetAllScores(): Promise<{ count: number }> {
+  let count = 0;
+  if (isPrismaConfigured()) {
+    try {
+      const result = await prisma.score.deleteMany({});
+      count = result.count;
+    } catch (err) {
+      console.warn("Prisma reset scores failed:", err);
+    }
+  }
+
+  memoryStore.scores.clear();
+  try {
+    if (fs.existsSync(LOCAL_STORE_FILE)) {
+      fs.writeFileSync(LOCAL_STORE_FILE, "[]", "utf-8");
+    }
+  } catch (err) {
+    console.warn("Could not empty local store file:", err);
+  }
+
+  return { count };
+}
 
 function isPrismaConfigured(): boolean {
   const url = process.env.DATABASE_URL;
@@ -534,6 +485,7 @@ export async function getAdminLeaderboard(): Promise<{
   // Fetch all scores
   const allScoresMap: Map<string, JudgeScoreItem> = new Map();
 
+  let fetchedFromDb = false;
   if (isPrismaConfigured()) {
     try {
       const dbScores = await prisma.score.findMany({
@@ -566,13 +518,14 @@ export async function getAdminLeaderboard(): Promise<{
           })),
         });
       }
+      fetchedFromDb = true;
     } catch (err) {
       console.warn("Prisma leaderboard fetch failed, falling back to memory:", err);
     }
   }
 
-  // If map empty or fallback needed
-  if (allScoresMap.size === 0) {
+  // Only fallback to memoryStore if DB query was not executed or failed
+  if (!fetchedFromDb) {
     for (const [key, s] of memoryStore.scores.entries()) {
       const user = memoryStore.users.find((u) => u.id === s.userId);
       allScoresMap.set(key, {

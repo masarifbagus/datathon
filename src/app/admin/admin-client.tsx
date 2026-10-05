@@ -4,7 +4,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { Modal, ModalHeader, ModalTitle, ModalBody, ModalFooter } from "@/components/ui/modal";
-import { RefreshCw, FileSpreadsheet } from "lucide-react";
+import { RefreshCw, FileSpreadsheet, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import type { TeamLeaderboardRow, UserItem, CriterionItem } from "@/lib/scoring-service";
 import type { SessionPayload } from "@/lib/auth";
@@ -33,6 +33,7 @@ export function AdminClient({ session, initialData }: AdminClientProps) {
   const [refreshInterval, setRefreshInterval] = useState<number>(3000);
   const [selectedRow, setSelectedRow] = useState<TeamLeaderboardRow | null>(null);
   const [isExporting, setIsExporting] = useState<boolean>(false);
+  const [isResetting, setIsResetting] = useState<boolean>(false);
 
   const { data, isValidating, mutate } = useSWR("/api/leaderboard", fetcher, {
     fallbackData: initialData,
@@ -75,6 +76,28 @@ export function AdminClient({ session, initialData }: AdminClientProps) {
     }
   };
 
+  const handleResetScores = async () => {
+    const confirmed = window.confirm(
+      "PERINGATAN RESET:\nApakah Anda yakin ingin mengosongkan seluruh data penilaian dan komentar juri?\n\nSemua skor dan komentar akan dihapus bersih, sedangkan daftar tim, kriteria, dan akun juri tetap aman."
+    );
+    if (!confirmed) return;
+
+    try {
+      setIsResetting(true);
+      toast.info("Sedang mereset database...");
+      const res = await fetch("/api/admin/reset", { method: "POST" });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || "Gagal mereset database");
+      toast.success(json.message || "Database berhasil di-reset!");
+      await mutate();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Gagal mereset database");
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-6 space-y-5">
       {/* Header */}
@@ -105,7 +128,7 @@ export function AdminClient({ session, initialData }: AdminClientProps) {
             size="sm"
             variant="outline"
             onClick={() => mutate()}
-            disabled={isValidating}
+            disabled={isValidating || isResetting}
             className="h-8 text-xs px-2.5"
           >
             <RefreshCw className={`h-3 w-3 mr-1 ${isValidating ? "animate-spin" : ""}`} />
@@ -116,11 +139,23 @@ export function AdminClient({ session, initialData }: AdminClientProps) {
             size="sm"
             variant="default"
             onClick={handleExportExcel}
-            disabled={isExporting}
+            disabled={isExporting || isResetting}
             className="h-8 text-xs font-semibold px-3"
           >
             <FileSpreadsheet className="h-3.5 w-3.5 mr-1" />
             {isExporting ? "..." : "Export Excel"}
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleResetScores}
+            disabled={isResetting || isValidating}
+            title="Kosongkan seluruh nilai & komentar untuk mulai dari awal"
+            className="h-8 text-xs px-2.5 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/40 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer"
+          >
+            <RotateCcw className={`h-3 w-3 mr-1 ${isResetting ? "animate-spin" : ""}`} />
+            Reset Nilai
           </Button>
         </div>
       </div>
