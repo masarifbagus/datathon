@@ -64,9 +64,9 @@ export default async function HomePage() {
               <Image
                 src="/logo-tanoto.png"
                 alt="Tanoto Foundation"
-                width={110}
+                width={120}
                 height={45}
-                className="h-7 sm:h-8 w-auto object-contain rounded"
+                className="h-7 sm:h-8 w-auto object-contain"
                 priority
               />
             </div>
@@ -89,11 +89,6 @@ export default async function HomePage() {
                 <Button size="lg" variant="default" className="gap-2 font-semibold">
                   Mulai Penjurian
                   <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/admin/login">
-                <Button size="lg" variant="outline" className="font-medium">
-                  Portal Admin & Rekap
                 </Button>
               </Link>
             </div>
@@ -178,7 +173,7 @@ export default async function HomePage() {
           <span className="text-neutral-300 dark:text-neutral-700">•</span>
           <Image src="/logo-lan-datathon.png" alt="LAN Datathon" width={95} height={26} className="h-5 w-auto object-contain" />
           <span className="text-neutral-300 dark:text-neutral-700">•</span>
-          <Image src="/logo-tanoto.png" alt="Tanoto Foundation" width={65} height={26} className="h-4.5 w-auto object-contain rounded" />
+          <Image src="/logo-tanoto.png" alt="Tanoto Foundation" width={75} height={26} className="h-4.5 w-auto object-contain" />
         </div>
         <p>&copy; 2026 Lembaga Administrasi Negara Republik Indonesia (LAN RI) & Tanoto Foundation</p>
       </footer>

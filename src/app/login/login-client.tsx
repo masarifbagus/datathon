@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { loginWithCredentialsAction } from "@/app/actions/auth-actions";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowRight, User, Lock, ShieldCheck } from "lucide-react";
+import { Loader2, ArrowRight, User, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 const QUICK_JUDGE_USERNAMES = ["KemenpanRB", "KSP", "Tanoto Foundation", "LAN"];
@@ -92,7 +92,7 @@ export function LoginClient() {
             alt="Tanoto Foundation"
             width={95}
             height={36}
-            className="h-6.5 w-auto object-contain rounded"
+            className="h-6.5 w-auto object-contain"
             priority
           />
         </div>
@@ -184,17 +184,6 @@ export function LoginClient() {
             )}
           </Button>
         </form>
-      </div>
-
-      {/* Admin Portal Switcher */}
-      <div className="text-center pt-2">
-        <Link
-          href="/admin/login"
-          className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors"
-        >
-          <ShieldCheck className="h-3.5 w-3.5 text-neutral-400" />
-          <span>Akses Administrator Panitia? Masuk ke Portal Admin &rarr;</span>
-        </Link>
       </div>
     </div>
   );

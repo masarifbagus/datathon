@@ -56,9 +56,9 @@ export function Navbar({ session }: NavbarProps) {
             <Image
               src="/logo-tanoto.png"
               alt="Tanoto Foundation"
-              width={85}
+              width={90}
               height={32}
-              className="h-5 sm:h-6 w-auto object-contain rounded"
+              className="h-5 sm:h-6 w-auto object-contain"
               priority
             />
           </div>
@@ -77,22 +77,6 @@ export function Navbar({ session }: NavbarProps) {
                 </span>
               </div>
 
-              {/* {session.role === "judge" && (
-                <Link href="/judge">
-                  <Button size="sm" variant="outline" className="text-xs h-8">
-                    Lembar Nilai
-                  </Button>
-                </Link>
-              )} */}
-
-              {/* {session.role === "admin" && (
-                <Link href="/admin">
-                  <Button size="sm" variant="outline" className="text-xs h-8">
-                    Dashboard Rekap
-                  </Button>
-                </Link>
-              )} */}
-
               <Button
                 variant="ghost"
                 size="sm"
@@ -109,11 +93,6 @@ export function Navbar({ session }: NavbarProps) {
               <Link href="/login">
                 <Button size="sm" variant="default" className="text-xs h-8 font-medium">
                   Masuk Juri
-                </Button>
-              </Link>
-              <Link href="/admin/login">
-                <Button size="sm" variant="outline" className="text-xs h-8 font-medium text-neutral-600 dark:text-neutral-400">
-                  Admin
                 </Button>
               </Link>
             </div>

@@ -85,7 +85,7 @@ export function AdminLoginClient() {
             alt="Tanoto Foundation"
             width={95}
             height={36}
-            className="h-6.5 w-auto object-contain rounded"
+            className="h-6.5 w-auto object-contain"
             priority
           />
         </div>
