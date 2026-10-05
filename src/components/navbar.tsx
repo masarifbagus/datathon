@@ -73,13 +73,13 @@ export function Navbar({ session }: NavbarProps) {
                 </Link>
               )}
 
-              {session.role === "admin" && (
+              {/* {session.role === "admin" && (
                 <Link href="/admin">
                   <Button size="sm" variant="outline" className="text-xs h-8">
                     Dashboard Rekap
                   </Button>
                 </Link>
-              )}
+              )} */}
 
               <Button
                 variant="ghost"
