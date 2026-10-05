@@ -79,6 +79,15 @@ export function AdminLoginClient() {
             className="h-8 w-auto object-contain"
             priority
           />
+          <div className="h-5 w-px bg-neutral-200 dark:bg-neutral-800" />
+          <Image
+            src="/logo-tanoto.png"
+            alt="Tanoto Foundation"
+            width={95}
+            height={36}
+            className="h-6.5 w-auto object-contain rounded"
+            priority
+          />
         </div>
 
         <div>
