@@ -16,7 +16,6 @@ export interface TeamItem {
   id: string;
   orderNo: number;
   name: string;
-  leadName?: string | null;
   institution?: string | null;
   description?: string | null;
 }
@@ -106,7 +105,6 @@ const memoryStore: MemoryStore = {
     id: `team_${t.orderNo}`,
     orderNo: t.orderNo,
     name: t.name,
-    leadName: t.leadName,
     institution: t.institution,
     description: t.description,
   })),
@@ -230,7 +228,6 @@ export async function getTeams(): Promise<TeamItem[]> {
           id: t.id,
           orderNo: t.orderNo,
           name: t.name,
-          leadName: t.leadName,
           institution: t.institution,
           description: t.description,
         }));

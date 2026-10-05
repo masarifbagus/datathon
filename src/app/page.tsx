@@ -128,11 +128,6 @@ export default async function HomePage() {
                         <h3 className="font-semibold text-sm text-neutral-900 dark:text-white">
                           {team.name}
                         </h3>
-                        {team.leadName && (
-                          <span className="text-xs text-neutral-400">
-                            {team.leadName}
-                          </span>
-                        )}
                       </div>
                       <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 line-clamp-2">
                         {team.description}

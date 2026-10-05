@@ -49,9 +49,9 @@ export function JudgeClient({
     for (const c of criteria) {
       if (currentSavedScore) {
         const detail = currentSavedScore.details.find((d) => d.criterionId === c.id || d.criterionCode === c.code);
-        initial[c.id] = detail ? String(detail.rawScore) : "80";
+        initial[c.id] = detail ? String(detail.rawScore) : "";
       } else {
-        initial[c.id] = "80";
+        initial[c.id] = "";
       }
     }
     return initial;
@@ -83,10 +83,10 @@ export function JudgeClient({
     for (const c of criteria) {
       if (existing) {
         const detail = existing.details.find((d) => d.criterionId === c.id || d.criterionCode === c.code);
-        newFormScores[c.id] = detail ? String(detail.rawScore) : "80";
+        newFormScores[c.id] = detail ? String(detail.rawScore) : "";
         newComments[c.id] = detail?.comment || "";
       } else {
-        newFormScores[c.id] = "80";
+        newFormScores[c.id] = "";
         newComments[c.id] = "";
       }
     }
@@ -277,11 +277,6 @@ export function JudgeClient({
           <h2 className="text-base font-bold text-neutral-900 dark:text-white">
             {currentTeam.orderNo}. {currentTeam.name}
           </h2>
-          {currentTeam.leadName && (
-            <p className="text-xs text-neutral-400">
-              {currentTeam.leadName}
-            </p>
-          )}
         </div>
 
         <div className="flex items-center gap-1">

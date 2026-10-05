@@ -26,7 +26,6 @@ model Team {
   id          String   @id @default(cuid())
   orderNo     Int      @unique
   name        String
-  leadName    String?
   institution String?  @default("LAN RI")
   description String?
   createdAt   DateTime @default(now())

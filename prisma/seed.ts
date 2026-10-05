@@ -41,7 +41,6 @@ async function main() {
       where: { orderNo: team.orderNo },
       update: {
         name: team.name,
-        leadName: team.leadName,
         institution: team.institution,
         description: team.description,
       },

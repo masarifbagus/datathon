@@ -23,10 +23,10 @@ export async function GET() {
     };
 
     // Table Column Headers (Row 6)
+    // Table Column Headers (Row 6)
     const rekapHeaders = [
       "NO",
       "NAMA TIM",
-      "KETUA TIM",
       "INSTANSI",
       ...judges.map((j) => j.name.toUpperCase()),
       "NILAI AKHIR (RATA-RATA)",
@@ -42,6 +42,11 @@ export async function GET() {
     const startRowIdx = 6; // Excel row 7 (0-indexed: 6)
     const endRowIdx = startRowIdx + rows.length - 1; // Excel row 11
 
+    const avgColIdx = 3 + judges.length; // Col H for 4 judges (index 7)
+    const avgColLetter = String.fromCharCode(65 + avgColIdx); // "H"
+    const rankColIdx = avgColIdx + 1; // Col I (index 8)
+    const statusColIdx = rankColIdx + 1; // Col J (index 9)
+
     rows.forEach((r, idx) => {
       const currentR = startRowIdx + idx; // 0-indexed row
       const excelRowNumber = currentR + 1; // 1-indexed row in Excel (7, 8, 9...)
@@ -50,15 +55,13 @@ export async function GET() {
       worksheetRekap[XLSX.utils.encode_cell({ c: 0, r: currentR })] = { t: "n", v: idx + 1 };
       // Col B: NAMA TIM
       worksheetRekap[XLSX.utils.encode_cell({ c: 1, r: currentR })] = { t: "s", v: r.team.name };
-      // Col C: KETUA TIM
-      worksheetRekap[XLSX.utils.encode_cell({ c: 2, r: currentR })] = { t: "s", v: r.team.leadName || "-" };
-      // Col D: INSTANSI
-      worksheetRekap[XLSX.utils.encode_cell({ c: 3, r: currentR })] = { t: "s", v: r.team.institution || "LAN RI" };
+      // Col C: INSTANSI
+      worksheetRekap[XLSX.utils.encode_cell({ c: 2, r: currentR })] = { t: "s", v: r.team.institution || "LAN RI" };
 
-      // Col E, F, G, H: JURI 1, 2, 3, 4 (Bobot Terhitung)
+      // Col D, E, F, G: JURI 1, 2, 3, 4 (Bobot Terhitung)
       judges.forEach((j, jIdx) => {
         const scoreItem = r.judgeScores[j.username];
-        const cellRef = XLSX.utils.encode_cell({ c: 4 + jIdx, r: currentR });
+        const cellRef = XLSX.utils.encode_cell({ c: 3 + jIdx, r: currentR });
         if (scoreItem !== null) {
           worksheetRekap[cellRef] = {
             t: "n",
@@ -69,11 +72,11 @@ export async function GET() {
         }
       });
 
-      // Col I: NILAI AKHIR (RATA-RATA)
-      // Rumus Excel Asli: =AVERAGE(E7:H7)
-      const avgColRef = XLSX.utils.encode_cell({ c: 8, r: currentR });
-      const firstJudgeColLetter = "E";
-      const lastJudgeColLetter = String.fromCharCode(68 + judges.length); // H for 4 judges
+      // NILAI AKHIR (RATA-RATA)
+      // Rumus Excel Asli: =AVERAGE(D7:G7)
+      const avgColRef = XLSX.utils.encode_cell({ c: avgColIdx, r: currentR });
+      const firstJudgeColLetter = "D";
+      const lastJudgeColLetter = String.fromCharCode(64 + 3 + judges.length); // G for 4 judges
       const avgFormula = `AVERAGE(${firstJudgeColLetter}${excelRowNumber}:${lastJudgeColLetter}${excelRowNumber})`;
       const defaultAvgVal = r.finalScore !== null ? Number(r.finalScore.toFixed(2)) : 0;
 
@@ -83,19 +86,19 @@ export async function GET() {
         v: defaultAvgVal,
       };
 
-      // Col J: PERINGKAT (RANKING)
-      // Rumus Excel Asli: =RANK(I7, $I$7:$I$11)
-      const rankColRef = XLSX.utils.encode_cell({ c: 9, r: currentR });
-      const rankRange = `$I$${startRowIdx + 1}:$I$${endRowIdx + 1}`;
-      const rankFormula = `RANK(I${excelRowNumber},${rankRange})`;
+      // PERINGKAT (RANKING)
+      // Rumus Excel Asli: =RANK(H7, $H$7:$H$11)
+      const rankColRef = XLSX.utils.encode_cell({ c: rankColIdx, r: currentR });
+      const rankRange = `$${avgColLetter}$${startRowIdx + 1}:$${avgColLetter}$${endRowIdx + 1}`;
+      const rankFormula = `RANK(${avgColLetter}${excelRowNumber},${rankRange})`;
       worksheetRekap[rankColRef] = {
         t: "n",
         f: rankFormula,
         v: r.rank > 0 ? r.rank : idx + 1,
       };
 
-      // Col K: STATUS PROGRES
-      const statusColRef = XLSX.utils.encode_cell({ c: 10, r: currentR });
+      // STATUS PROGRES
+      const statusColRef = XLSX.utils.encode_cell({ c: statusColIdx, r: currentR });
       worksheetRekap[statusColRef] = {
         t: "s",
         v: `${r.submittedCount} / ${r.totalJudges} Juri Selesai`,
@@ -104,33 +107,33 @@ export async function GET() {
 
     // Summary Statistics Rows (Rata-rata, Tertinggi, Terendah)
     const summaryStartRow = endRowIdx + 2; // e.g. Excel row 13
-    worksheetRekap[XLSX.utils.encode_cell({ c: 3, r: summaryStartRow })] = {
+    worksheetRekap[XLSX.utils.encode_cell({ c: 2, r: summaryStartRow })] = {
       t: "s",
       v: "Rata-rata Keseluruhan",
     };
-    worksheetRekap[XLSX.utils.encode_cell({ c: 8, r: summaryStartRow })] = {
+    worksheetRekap[XLSX.utils.encode_cell({ c: avgColIdx, r: summaryStartRow })] = {
       t: "n",
-      f: `AVERAGE(I${startRowIdx + 1}:I${endRowIdx + 1})`,
+      f: `AVERAGE(${avgColLetter}${startRowIdx + 1}:${avgColLetter}${endRowIdx + 1})`,
       v: rows.length > 0 ? Number((rows.reduce((acc, curr) => acc + (curr.finalScore || 0), 0) / rows.length).toFixed(2)) : 0,
     };
 
-    worksheetRekap[XLSX.utils.encode_cell({ c: 3, r: summaryStartRow + 1 })] = {
+    worksheetRekap[XLSX.utils.encode_cell({ c: 2, r: summaryStartRow + 1 })] = {
       t: "s",
       v: "Nilai Tertinggi (Maksimal)",
     };
-    worksheetRekap[XLSX.utils.encode_cell({ c: 8, r: summaryStartRow + 1 })] = {
+    worksheetRekap[XLSX.utils.encode_cell({ c: avgColIdx, r: summaryStartRow + 1 })] = {
       t: "n",
-      f: `MAX(I${startRowIdx + 1}:I${endRowIdx + 1})`,
+      f: `MAX(${avgColLetter}${startRowIdx + 1}:${avgColLetter}${endRowIdx + 1})`,
       v: rows[0]?.finalScore ?? 0,
     };
 
-    worksheetRekap[XLSX.utils.encode_cell({ c: 3, r: summaryStartRow + 2 })] = {
+    worksheetRekap[XLSX.utils.encode_cell({ c: 2, r: summaryStartRow + 2 })] = {
       t: "s",
       v: "Nilai Terendah (Minimal)",
     };
-    worksheetRekap[XLSX.utils.encode_cell({ c: 8, r: summaryStartRow + 2 })] = {
+    worksheetRekap[XLSX.utils.encode_cell({ c: avgColIdx, r: summaryStartRow + 2 })] = {
       t: "n",
-      f: `MIN(I${startRowIdx + 1}:I${endRowIdx + 1})`,
+      f: `MIN(${avgColLetter}${startRowIdx + 1}:${avgColLetter}${endRowIdx + 1})`,
       v: rows[rows.length - 1]?.finalScore ?? 0,
     };
 
@@ -154,22 +157,18 @@ export async function GET() {
     // Set Range
     worksheetRekap["!ref"] = XLSX.utils.encode_range({
       s: { c: 0, r: 0 },
-      e: { c: 10, r: notesStartRow + criteria.length + 2 },
+      e: { c: statusColIdx, r: notesStartRow + criteria.length + 2 },
     });
 
     // Column Widths
     worksheetRekap["!cols"] = [
       { wch: 6 },  // NO
       { wch: 24 }, // NAMA TIM
-      { wch: 26 }, // KETUA TIM
       { wch: 26 }, // INSTANSI
-      { wch: 14 }, // JURI 1
-      { wch: 14 }, // JURI 2
-      { wch: 14 }, // JURI 3
-      { wch: 14 }, // JURI 4
+      ...judges.map(() => ({ wch: 14 })), // JURI 1..N
       { wch: 26 }, // NILAI AKHIR (RATA-RATA)
       { wch: 14 }, // PERINGKAT
-      { wch: 22 }, // STATUS PROGRES
+      { wch: 24 }, // STATUS PROGRES
     ];
 
     // ==========================================
