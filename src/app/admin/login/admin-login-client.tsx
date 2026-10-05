@@ -139,7 +139,7 @@ export function AdminLoginClient() {
               className="w-full py-2 px-3 text-sm font-mono rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 dark:focus:border-white transition-colors"
             />
             <p className="text-[10px] text-neutral-400 font-mono">
-              Password default demo: <span className="font-bold text-neutral-600 dark:text-neutral-300">admin123</span>
+              Password default: <span className="font-bold text-neutral-600 dark:text-neutral-300">admin123</span>
             </p>
           </div>
 

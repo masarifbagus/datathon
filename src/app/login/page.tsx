@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 
 export const metadata = {
   title: "Login Dewan Juri | LAN Datathon 2026",
-  description: "Portal masuk dewan juri Demo Day LAN Datathon 2026",
+  description: "Portal masuk dewan juri LAN Datathon 2026",
 };
 
 export default async function LoginPage() {

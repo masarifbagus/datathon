@@ -15,7 +15,7 @@ export async function GET() {
 
     // Header Metadata
     worksheetRekap["A1"] = { t: "s", v: "LEMBAGA ADMINISTRASI NEGARA REPUBLIK INDONESIA" };
-    worksheetRekap["A2"] = { t: "s", v: "DEMO DAY LAN DATATHON 2026" };
+    worksheetRekap["A2"] = { t: "s", v: "LAN DATATHON 2026" };
     worksheetRekap["A3"] = { t: "s", v: "REKAPITULASI HASIL PENILAIAN DEWAN JURI" };
     worksheetRekap["A4"] = {
       t: "s",
@@ -177,7 +177,7 @@ export async function GET() {
     const worksheetDetail: XLSX.WorkSheet = {};
 
     worksheetDetail["A1"] = { t: "s", v: "RINCIAN SKOR PER ASPEK & KOMENTAR KUALITATIF DEWAN JURI" };
-    worksheetDetail["A2"] = { t: "s", v: "DEMO DAY LAN DATATHON 2026" };
+    worksheetDetail["A2"] = { t: "s", v: "LAN DATATHON 2026" };
 
     const detailHeaders = [
       "NO",

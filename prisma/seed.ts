@@ -42,7 +42,6 @@ async function main() {
       update: {
         name: team.name,
         institution: team.institution,
-        description: team.description,
       },
       create: team,
     });

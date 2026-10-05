@@ -17,7 +17,6 @@ export interface TeamItem {
   orderNo: number;
   name: string;
   institution?: string | null;
-  description?: string | null;
 }
 
 export interface UserItem {
@@ -106,7 +105,6 @@ const memoryStore: MemoryStore = {
     orderNo: t.orderNo,
     name: t.name,
     institution: t.institution,
-    description: t.description,
   })),
   scores: new Map(),
 };
@@ -229,7 +227,6 @@ export async function getTeams(): Promise<TeamItem[]> {
           orderNo: t.orderNo,
           name: t.name,
           institution: t.institution,
-          description: t.description,
         }));
       }
     } catch (err) {

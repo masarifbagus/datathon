@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "Login Administrator | LAN Datathon 2026",
-  description: "Portal khusus administrator panitia Demo Day LAN Datathon 2026",
+  description: "Portal khusus administrator panitia LAN Datathon 2026",
 };
 
 export default async function AdminLoginPage() {

@@ -1,6 +1,6 @@
-# 🏆 Sistem Penilaian Demo Day LAN Datathon 2026
+# 🏆 Sistem Penilaian LAN Datathon 2026
 
-Aplikasi web sistem penilaian terintegrasi untuk **"Demo Day LAN Datathon 2026"** yang siap langsung di-deploy ke **Vercel** menggunakan **Next.js (App Router)**, **TypeScript**, **Tailwind CSS**, **shadcn/ui**, **Jose JWT**, dan **Supabase PostgreSQL** (dengan Prisma ORM & konfigurasi Serverless Connection Pooler).
+Aplikasi web sistem penilaian terintegrasi untuk **"LAN Datathon 2026"** yang siap langsung di-deploy ke **Vercel** menggunakan **Next.js (App Router)**, **TypeScript**, **Tailwind CSS**, **shadcn/ui**, **Jose JWT**, dan **Supabase PostgreSQL** (dengan Prisma ORM & konfigurasi Serverless Connection Pooler).
 
 ---
 
@@ -30,7 +30,7 @@ Aplikasi web sistem penilaian terintegrasi untuk **"Demo Day LAN Datathon 2026"*
 |:--:|:---|:---:|:---|
 | 1 | **Relevansi** | **10%** (0.10) | Kesesuaian solusi dengan kebutuhan strategis LAN RI |
 | 2 | **Inovasi dan Orisinalitas** | **25%** (0.25) | Kebaruan konsep, ide kreatif, dan diferensiasi solusi |
-| 3 | **Penerapan Teknologi & Fungsionalitas** | **25%** (0.25) | Kualitas teknis arsitektur dan keandalan demo prototype |
+| 3 | **Penerapan Teknologi & Fungsionalitas** | **25%** (0.25) | Kualitas teknis arsitektur dan keandalan prototype |
 | 4 | **Dampak, Keberlanjutan & Replikasi** | **30%** (0.30) | Nilai guna nyata, kemudahan adopsi, dan skalabilitas |
 | 5 | **Presentasi dan Keterpaduan Tim** | **10%** (0.10) | Artikulasi penyampaian, penguasaan materi, dan kekompakan tim |
 
@@ -72,7 +72,7 @@ DIRECT_URL="postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler
 JWT_SECRET="lan-datathon-2026-secret-session-key-secure-jwt-lan-ri"
 ```
 
-> **Catatan:** Aplikasi telah dilengkapi dengan mekanisme *memory store fallback*. Anda dapat langsung menguji dan mendemokan aplikasi secara lokal bahkan sebelum database Supabase dihubungkan!
+> **Catatan:** Aplikasi telah dilengkapi dengan mekanisme *memory store fallback*. Anda dapat langsung menguji aplikasi secara lokal bahkan sebelum database Supabase dihubungkan!
 
 ### 3. Migrasi Database & Seeding (Opsional jika menggunakan Supabase)
 ```bash

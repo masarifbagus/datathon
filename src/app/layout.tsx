@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Demo Day LAN Datathon 2026 | Sistem Penilaian Dewan Juri",
+  title: "LAN Datathon 2026 | Sistem Penilaian Dewan Juri",
   description:
     "Aplikasi sistem penilaian dewan juri dan dashboard rekapitulasi nilai kompetisi LAN Datathon 2026 - Lembaga Administrasi Negara RI",
   authors: [{ name: "LAN RI" }],

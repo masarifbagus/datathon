@@ -107,7 +107,7 @@ export function AdminClient({ session, initialData }: AdminClientProps) {
             Rekapitulasi Penilaian
           </h1>
           <p className="text-xs text-neutral-400">
-            Demo Day LAN Datathon 2026
+            LAN Datathon 2026
           </p>
         </div>
 

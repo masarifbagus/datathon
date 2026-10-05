@@ -6,7 +6,7 @@ import { JudgeClient } from "./judge-client";
 
 export const metadata = {
   title: "Lembar Penilaian Dewan Juri | LAN Datathon 2026",
-  description: "Form input nilai dan komentar dewan juri Demo Day LAN Datathon 2026",
+  description: "Form input nilai dan komentar dewan juri LAN Datathon 2026",
 };
 
 export default async function JudgePage() {

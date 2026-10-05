@@ -225,7 +225,7 @@ export function JudgeClient({
             {session.name}
           </h1>
           <p className="text-xs text-neutral-400">
-            Penilaian Demo Day
+            Penilaian LAN Datathon 2026
           </p>
         </div>
 

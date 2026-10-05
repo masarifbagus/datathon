@@ -10,8 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 export const metadata = {
-  title: "Demo Day LAN Datathon 2026",
-  description: "Sistem penilaian dewan juri dan rekapitulasi nilai Demo Day LAN Datathon 2026",
+  title: "LAN Datathon 2026",
+  description: "Sistem penilaian dewan juri dan rekapitulasi nilai LAN Datathon 2026",
 };
 
 export default async function HomePage() {
@@ -73,7 +73,7 @@ export default async function HomePage() {
 
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-xs font-medium text-neutral-600 dark:text-neutral-400">
               <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-              <span>Demo Day LAN Datathon 2026 • Makarti Bhakti Nagari</span>
+              <span>LAN Datathon 2026 • Makarti Bhakti Nagari</span>
             </div>
 
             <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 dark:text-white">
@@ -105,7 +105,7 @@ export default async function HomePage() {
                   Tim Peserta Finalis
                 </h2>
                 <p className="text-xs text-neutral-500">
-                  5 tim peserta yang mempresentasikan proyek pada Demo Day
+                  5 tim peserta yang mempresentasikan proyek pada LAN Datathon 2026
                 </p>
               </div>
 
@@ -113,20 +113,15 @@ export default async function HomePage() {
                 {teams.map((team) => (
                   <div
                     key={team.id}
-                    className="p-4 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 flex items-start gap-3.5"
+                    className="py-3 px-4 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 flex items-center gap-3.5 shadow-sm"
                   >
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-neutral-100 dark:bg-neutral-800 font-mono text-xs font-bold text-neutral-700 dark:text-neutral-300">
                       {team.orderNo}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <h3 className="font-semibold text-sm text-neutral-900 dark:text-white">
-                          {team.name}
-                        </h3>
-                      </div>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 line-clamp-2">
-                        {team.description}
-                      </p>
+                      <h3 className="font-semibold text-sm text-neutral-900 dark:text-white truncate">
+                        {team.name}
+                      </h3>
                     </div>
                   </div>
                 ))}

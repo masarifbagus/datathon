@@ -18,7 +18,7 @@ export const DEFAULT_CRITERIA = [
     name: "Penerapan Teknologi dan Fungsionalitas Aplikasi",
     weight: 0.25,
     order: 3,
-    description: "Kualitas arsitektur teknis, kinerja aplikasi, keandalan fungsional, dan eksekusi demo prototype.",
+    description: "Kualitas arsitektur teknis, kinerja aplikasi, keandalan fungsional, dan eksekusi prototype.",
   },
   {
     code: "dampak",
@@ -41,31 +41,26 @@ export const DEFAULT_TEAMS = [
     orderNo: 1,
     name: "Adek Muhammad Zulkham",
     institution: "LAN RI / Mitra Datathon",
-    description: "Platform digital integrasi data perdesaan terpadu untuk penguatan tata kelola pemerintahan desa.",
   },
   {
     orderNo: 2,
     name: "Sparta",
     institution: "LAN RI / Mitra Datathon",
-    description: "Sistem analitik cerdas pengelolaan sumber daya dan pemantauan aliran data berbasis dashboard interaktif.",
   },
   {
     orderNo: 3,
     name: "Tim Tangga",
     institution: "LAN RI / Mitra Datathon",
-    description: "Aplikasi percepatan pengambilan keputusan strategis instansi berbasis model machine learning prediktif.",
   },
   {
     orderNo: 4,
     name: "Brantas",
     institution: "LAN RI / Mitra Datathon",
-    description: "Ekosistem data analitik terintegrasi untuk pemetaan kompetensi aparatur sipil negara secara holistik.",
   },
   {
     orderNo: 5,
     name: "Tim Cendekia",
     institution: "LAN RI / Mitra Datathon",
-    description: "Solusi otomatisasi agregasi data lintas instansi guna efisiensi monitoring dan evaluasi program prioritas.",
   },
 ];
 
