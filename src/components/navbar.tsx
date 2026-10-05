@@ -49,6 +49,18 @@ export function Navbar({ session }: NavbarProps) {
               className="h-6 sm:h-7.5 w-auto object-contain"
               priority
             />
+
+            <div className="h-4 w-px bg-neutral-200" />
+
+            {/* Logo Tanoto Foundation */}
+            <Image
+              src="/logo-tanoto.png"
+              alt="Tanoto Foundation"
+              width={85}
+              height={32}
+              className="h-5 sm:h-6 w-auto object-contain rounded"
+              priority
+            />
           </div>
         </Link>
 
