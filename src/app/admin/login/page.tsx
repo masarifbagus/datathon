@@ -1,16 +1,21 @@
 import { Suspense } from "react";
-import { LoginClient } from "./login-client";
+import { AdminLoginClient } from "./admin-login-client";
 import { Navbar } from "@/components/navbar";
 import { getSession } from "@/lib/auth";
 import { Loader2 } from "lucide-react";
+import { redirect } from "next/navigation";
 
 export const metadata = {
-  title: "Login Dewan Juri | LAN Datathon 2026",
-  description: "Portal masuk dewan juri Demo Day LAN Datathon 2026",
+  title: "Login Administrator | LAN Datathon 2026",
+  description: "Portal khusus administrator panitia Demo Day LAN Datathon 2026",
 };
 
-export default async function LoginPage() {
+export default async function AdminLoginPage() {
   const session = await getSession();
+
+  if (session && session.role === "admin") {
+    redirect("/admin");
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50/70 text-slate-900">
@@ -23,7 +28,7 @@ export default async function LoginPage() {
             </div>
           }
         >
-          <LoginClient />
+          <AdminLoginClient />
         </Suspense>
       </main>
     </div>

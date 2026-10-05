@@ -4,13 +4,13 @@ import { useState, useTransition, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { submitJudgeScoreAction } from "@/app/actions/score-actions";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Check,
   ChevronLeft,
   ChevronRight,
   Save,
-  RotateCcw
+  RotateCcw,
+  MessageSquare
 } from "lucide-react";
 import { toast } from "sonner";
 import type { CriterionItem, TeamItem, JudgeScoreItem } from "@/lib/scoring-service";
@@ -43,11 +43,12 @@ export function JudgeClient({
 
   const currentSavedScore = scoresMap[selectedTeamId];
 
+  // Raw score per criterion
   const [formScores, setFormScores] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
     for (const c of criteria) {
       if (currentSavedScore) {
-        const detail = currentSavedScore.details.find((d) => d.criterionId === c.id);
+        const detail = currentSavedScore.details.find((d) => d.criterionId === c.id || d.criterionCode === c.code);
         initial[c.id] = detail ? String(detail.rawScore) : "80";
       } else {
         initial[c.id] = "80";
@@ -56,23 +57,42 @@ export function JudgeClient({
     return initial;
   });
 
-  const [comment, setComment] = useState<string>(() => currentSavedScore?.comment || "");
+  // Comment per criterion (satu nilai satu komentar)
+  const [criterionComments, setCriterionComments] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    for (const c of criteria) {
+      if (currentSavedScore) {
+        const detail = currentSavedScore.details.find((d) => d.criterionId === c.id || d.criterionCode === c.code);
+        initial[c.id] = detail?.comment || "";
+      } else {
+        initial[c.id] = "";
+      }
+    }
+    return initial;
+  });
+
+  const [generalComment, setGeneralComment] = useState<string>(() => currentSavedScore?.comment || "");
   const [activeCriterionId, setActiveCriterionId] = useState<string | null>(criteria[0]?.id || null);
 
   const handleSelectTeam = (teamId: string) => {
     setSelectedTeamId(teamId);
     const existing = scoresMap[teamId];
     const newFormScores: Record<string, string> = {};
+    const newComments: Record<string, string> = {};
+
     for (const c of criteria) {
       if (existing) {
-        const detail = existing.details.find((d) => d.criterionId === c.id);
+        const detail = existing.details.find((d) => d.criterionId === c.id || d.criterionCode === c.code);
         newFormScores[c.id] = detail ? String(detail.rawScore) : "80";
+        newComments[c.id] = detail?.comment || "";
       } else {
         newFormScores[c.id] = "80";
+        newComments[c.id] = "";
       }
     }
     setFormScores(newFormScores);
-    setComment(existing?.comment || "");
+    setCriterionComments(newComments);
+    setGeneralComment(existing?.comment || "");
   };
 
   const handleScoreChange = (criterionId: string, valueStr: string) => {
@@ -86,6 +106,13 @@ export function JudgeClient({
     setFormScores((prev) => ({
       ...prev,
       [criterionId]: String(val),
+    }));
+  };
+
+  const handleCommentChange = (criterionId: string, text: string) => {
+    setCriterionComments((prev) => ({
+      ...prev,
+      [criterionId]: text,
     }));
   };
 
@@ -104,7 +131,7 @@ export function JudgeClient({
     for (const c of criteria) {
       const valStr = formScores[c.id];
       if (!valStr || valStr.trim() === "") {
-        toast.error(`Kriteria "${c.name}" wajib diisi!`);
+        toast.error(`Kriteria "${c.name}" wajib diisi nilainya!`);
         setActiveCriterionId(c.id);
         return;
       }
@@ -122,11 +149,12 @@ export function JudgeClient({
         const res = await submitJudgeScoreAction({
           teamId: selectedTeamId,
           rawScores: numericScores,
-          comment: comment.trim(),
+          criterionComments: criterionComments,
+          comment: generalComment.trim(),
         });
 
         if (res.success) {
-          toast.success(`Nilai disimpan! Total: ${res.totalWeightedScore.toFixed(2)}`);
+          toast.success(`Nilai & komentar disimpan! Total: ${res.totalWeightedScore.toFixed(2)}`);
 
           const updatedDetails = criteria.map((c) => {
             const raw = numericScores[c.id] ?? 0;
@@ -137,6 +165,7 @@ export function JudgeClient({
               weight: c.weight,
               rawScore: raw,
               weightedScore: Number((raw * c.weight).toFixed(2)),
+              comment: criterionComments[c.id] || "",
             };
           });
 
@@ -149,7 +178,7 @@ export function JudgeClient({
               judgeName: session.name,
               teamId: selectedTeamId,
               totalWeightedScore: res.totalWeightedScore,
-              comment: comment.trim(),
+              comment: generalComment.trim(),
               updatedAt: new Date().toISOString(),
               details: updatedDetails,
             },
@@ -168,9 +197,14 @@ export function JudgeClient({
 
   const handleResetForm = () => {
     const resetScores: Record<string, string> = {};
-    for (const c of criteria) resetScores[c.id] = "";
+    const resetComments: Record<string, string> = {};
+    for (const c of criteria) {
+      resetScores[c.id] = "";
+      resetComments[c.id] = "";
+    }
     setFormScores(resetScores);
-    setComment("");
+    setCriterionComments(resetComments);
+    setGeneralComment("");
     toast.info("Formulir dikosongkan.");
   };
 
@@ -273,10 +307,11 @@ export function JudgeClient({
         </div>
       </div>
 
-      {/* Criteria Cards (Concise, Clean, Less Text) */}
+      {/* Criteria Cards: 1 Nilai + 1 Komentar per Kriteria */}
       <div className="space-y-3">
         {criteria.map((c) => {
           const currentVal = formScores[c.id] ?? "";
+          const currentComment = criterionComments[c.id] ?? "";
           const num = parseFloat(currentVal);
           const isValidNumber = !isNaN(num) && num >= 0 && num <= 100 && currentVal.trim() !== "";
           const weightedContribution = isValidNumber ? Number((num * c.weight).toFixed(2)) : 0;
@@ -286,23 +321,24 @@ export function JudgeClient({
             <div
               key={c.id}
               onClick={() => setActiveCriterionId(c.id)}
-              className={`rounded-lg bg-white dark:bg-neutral-900 border p-4 space-y-2.5 transition-colors ${
+              className={`rounded-lg bg-white dark:bg-neutral-900 border p-4 space-y-3 transition-colors ${
                 isActive
                   ? "border-neutral-400 dark:border-neutral-600 border-l-2 border-l-blue-600"
                   : "border-neutral-200 dark:border-neutral-800"
               }`}
             >
+              {/* Header */}
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold text-neutral-900 dark:text-white">
                   {c.order}. {c.name}
                 </span>
                 <span className="text-xs font-mono text-neutral-400">
-                  {(c.weight * 100).toFixed(0)}%
+                  Bobot {(c.weight * 100).toFixed(0)}%
                 </span>
               </div>
 
-              {/* Input + Presets Row */}
-              <div className="flex flex-wrap items-center gap-2 pt-0.5">
+              {/* Nilai / Score Row */}
+              <div className="flex flex-wrap items-center gap-2">
                 <div className="relative flex items-center w-28">
                   <input
                     type="number"
@@ -342,32 +378,26 @@ export function JudgeClient({
                   })}
                 </div>
               </div>
+
+              {/* Komentar Khusus untuk Kriteria Ini (1 Nilai 1 Komentar) */}
+              <div className="pt-2 border-t border-neutral-100 dark:border-neutral-800/80 space-y-1">
+                <div className="flex items-center justify-between text-[11px] text-neutral-400">
+                  <span className="font-medium text-neutral-500 dark:text-neutral-400">
+                    Komentar / Catatan Aspek {c.name}:
+                  </span>
+                </div>
+                <textarea
+                  rows={2}
+                  value={currentComment}
+                  onFocus={() => setActiveCriterionId(c.id)}
+                  onChange={(e) => handleCommentChange(c.id, e.target.value)}
+                  placeholder={`Tuliskan catatan evaluasi untuk aspek ${c.name.toLowerCase()}...`}
+                  className="w-full py-1.5 px-2.5 text-xs rounded border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white placeholder:text-neutral-400 resize-none transition-colors"
+                />
+              </div>
             </div>
           );
         })}
-
-        {/* Comment */}
-        <div
-          onClick={() => setActiveCriterionId("comment")}
-          className={`rounded-lg bg-white dark:bg-neutral-900 border p-4 space-y-2 transition-colors ${
-            activeCriterionId === "comment"
-              ? "border-neutral-400 dark:border-neutral-600 border-l-2 border-l-blue-600"
-              : "border-neutral-200 dark:border-neutral-800"
-          }`}
-        >
-          <span className="text-sm font-semibold text-neutral-900 dark:text-white">
-            Catatan (Opsional)
-          </span>
-
-          <textarea
-            rows={2}
-            value={comment}
-            onFocus={() => setActiveCriterionId("comment")}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="Tulis masukan untuk tim ini..."
-            className="w-full p-2.5 text-xs rounded border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white resize-y"
-          />
-        </div>
 
         {/* Minimal Bottom Bar */}
         <div className="sticky bottom-4 z-30 rounded-lg bg-white/95 dark:bg-neutral-900/95 backdrop-blur border border-neutral-200 dark:border-neutral-800 p-3 shadow-md">
@@ -399,7 +429,7 @@ export function JudgeClient({
                 className="font-semibold text-xs h-8 px-4"
               >
                 <Save className="h-3.5 w-3.5 mr-1" />
-                {isPending ? "Menyimpan..." : "Simpan Nilai"}
+                {isPending ? "Menyimpan..." : "Simpan Nilai & Komentar"}
               </Button>
             </div>
           </div>

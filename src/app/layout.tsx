@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#000000",
+  themeColor: "#ffffff",
   width: "device-width",
   initialScale: 1,
 };
@@ -35,11 +35,11 @@ export default function RootLayout({
     <html
       lang="id"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased light`}
     >
       <body
         suppressHydrationWarning
-        className="min-h-full flex flex-col font-sans bg-white text-neutral-900 dark:bg-black dark:text-neutral-100"
+        className="min-h-full flex flex-col font-sans bg-slate-50/70 text-slate-900"
       >
         {children}
         <Toaster position="top-right" richColors closeButton />

@@ -27,7 +27,7 @@ export default async function JudgePage() {
   ]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950">
+    <div className="min-h-screen flex flex-col bg-slate-50/70 text-slate-900">
       <Navbar session={session} />
       <main className="flex-1">
         <JudgeClient

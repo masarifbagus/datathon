@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { getTeams, getCriteria } from "@/lib/scoring-service";
@@ -25,34 +26,72 @@ export default async function HomePage() {
   const criteria = await getCriteria();
 
   return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-black text-neutral-900 dark:text-neutral-100">
+    <div className="min-h-screen flex flex-col bg-white text-neutral-900">
       <Navbar session={session} />
 
       <main className="flex-1">
-        {/* Minimal Hero */}
-        <section className="py-16 sm:py-24 border-b border-neutral-200 dark:border-neutral-800">
-          <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center space-y-5">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-xs font-medium text-neutral-600 dark:text-neutral-400">
+        {/* Minimal Hero with Official Logos */}
+        <section className="py-14 sm:py-20 border-b border-neutral-200 dark:border-neutral-800">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center space-y-6">
+            {/* Logo Showcase */}
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 pb-2">
+              <Image
+                src="/logo-lan-dark.png"
+                alt="Lembaga Administrasi Negara RI"
+                width={120}
+                height={48}
+                className="h-9 sm:h-11 w-auto object-contain dark:hidden"
+                priority
+              />
+              <Image
+                src="/logo-lan-putih.png"
+                alt="Lembaga Administrasi Negara RI"
+                width={120}
+                height={48}
+                className="h-9 sm:h-11 w-auto object-contain hidden dark:block"
+                priority
+              />
+              <div className="h-6 w-px bg-neutral-300 dark:bg-neutral-700 hidden sm:block" />
+              <Image
+                src="/logo-lan-datathon.png"
+                alt="LAN Datathon 2026"
+                width={160}
+                height={52}
+                className="h-10 sm:h-12 w-auto object-contain"
+                priority
+              />
+              <div className="h-6 w-px bg-neutral-300 dark:bg-neutral-700 hidden sm:block" />
+              <Image
+                src="/logo-tanoto.png"
+                alt="Tanoto Foundation"
+                width={110}
+                height={45}
+                className="h-7 sm:h-8 w-auto object-contain rounded"
+                priority
+              />
+            </div>
+
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-xs font-medium text-neutral-600 dark:text-neutral-400">
               <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-              <span>Lembaga Administrasi Negara Republik Indonesia</span>
+              <span>Demo Day LAN Datathon 2026 • Makarti Bhakti Nagari</span>
             </div>
 
             <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 dark:text-white">
-              Demo Day LAN Datathon 2026
+              Sistem Penilaian Dewan Juri
             </h1>
 
             <p className="text-neutral-500 dark:text-neutral-400 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
-              Sistem penilaian terintegrasi Dewan Juri & Dashboard Rekapitulasi Hasil Kompetisi Inovasi Data.
+              Platform penilaian terintegrasi Dewan Juri & Dashboard Rekapitulasi Hasil Kompetisi Inovasi Data LAN RI.
             </p>
 
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-3">
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
               <Link href="/login">
                 <Button size="lg" variant="default" className="gap-2 font-semibold">
                   Mulai Penjurian
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <Link href="/login">
+              <Link href="/admin/login">
                 <Button size="lg" variant="outline" className="font-medium">
                   Portal Admin & Rekap
                 </Button>
@@ -137,8 +176,16 @@ export default async function HomePage() {
         </section>
       </main>
 
-      <footer className="border-t border-neutral-200 dark:border-neutral-800 py-6 text-center text-xs text-neutral-400">
-        <p>&copy; 2026 Lembaga Administrasi Negara Republik Indonesia (LAN RI)</p>
+      <footer className="border-t border-neutral-200 dark:border-neutral-800 py-8 text-center text-xs text-neutral-400 space-y-3">
+        <div className="flex items-center justify-center gap-4 opacity-75">
+          <Image src="/logo-lan-dark.png" alt="LAN RI" width={75} height={26} className="h-5 w-auto object-contain dark:hidden" />
+          <Image src="/logo-lan-putih.png" alt="LAN RI" width={75} height={26} className="h-5 w-auto object-contain hidden dark:block" />
+          <span className="text-neutral-300 dark:text-neutral-700">•</span>
+          <Image src="/logo-lan-datathon.png" alt="LAN Datathon" width={95} height={26} className="h-5 w-auto object-contain" />
+          <span className="text-neutral-300 dark:text-neutral-700">•</span>
+          <Image src="/logo-tanoto.png" alt="Tanoto Foundation" width={65} height={26} className="h-4.5 w-auto object-contain rounded" />
+        </div>
+        <p>&copy; 2026 Lembaga Administrasi Negara Republik Indonesia (LAN RI) & Tanoto Foundation</p>
       </footer>
     </div>
   );

@@ -39,12 +39,20 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Protect /admin routes
-  if (pathname.startsWith("/admin")) {
+  // Handle /admin/login route
+  if (pathname === "/admin/login") {
+    if (session && session.role === "admin") {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // Protect /admin routes (except /admin/login)
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     if (!session) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(loginUrl);
+      const adminLoginUrl = new URL("/admin/login", request.url);
+      adminLoginUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(adminLoginUrl);
     }
     if (session.role !== "admin") {
       return NextResponse.redirect(new URL("/judge", request.url));
@@ -64,5 +72,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/judge/:path*", "/admin/:path*", "/login"],
+  matcher: ["/judge/:path*", "/admin", "/admin/:path*", "/login"],
 };

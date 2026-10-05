@@ -287,27 +287,63 @@ export function AdminClient({ session, initialData }: AdminClientProps) {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
                 {judges.map((judge) => {
                   const scoreItem = selectedRow.judgeScores[judge.username];
 
                   return (
                     <div
                       key={judge.id}
-                      className="p-3 rounded border border-neutral-200 dark:border-neutral-800 text-xs space-y-1.5"
+                      className="p-3.5 rounded-lg border border-neutral-200 dark:border-neutral-800 text-xs space-y-2.5 bg-neutral-50/50 dark:bg-neutral-800/30"
                     >
-                      <div className="flex items-center justify-between font-semibold">
-                        <span>{judge.name}</span>
-                        <span className="font-mono">
-                          {scoreItem ? scoreItem.totalWeightedScore.toFixed(2) : "-"}
+                      <div className="flex items-center justify-between font-semibold border-b border-neutral-200 dark:border-neutral-700/60 pb-2">
+                        <span className="text-neutral-900 dark:text-white font-medium">{judge.name}</span>
+                        <span className="font-mono text-xs">
+                          {scoreItem ? (
+                            <span className="font-bold text-neutral-900 dark:text-white">
+                              {scoreItem.totalWeightedScore.toFixed(2)} pts
+                            </span>
+                          ) : (
+                            <span className="text-neutral-400 font-normal">Belum Menilai</span>
+                          )}
                         </span>
                       </div>
 
-                      {scoreItem && scoreItem.comment && (
-                        <p className="text-neutral-500 italic text-[11px] pt-1 border-t border-neutral-100 dark:border-neutral-800">
-                          &ldquo;{scoreItem.comment}&rdquo;
-                        </p>
-                      )}
+                      {scoreItem && scoreItem.details && scoreItem.details.length > 0 ? (
+                        <div className="space-y-2 pt-0.5">
+                          {scoreItem.details.map((d) => (
+                            <div
+                              key={d.criterionId}
+                              className="p-2.5 rounded border border-neutral-200/80 dark:border-neutral-700/80 bg-white dark:bg-neutral-900 space-y-1.5"
+                            >
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="font-medium text-neutral-800 dark:text-neutral-200">
+                                  {d.criterionName}{" "}
+                                  <span className="text-[10px] text-neutral-400 font-mono">
+                                    ({(d.weight * 100).toFixed(0)}%)
+                                  </span>
+                                </span>
+                                <div className="font-mono text-xs">
+                                  <span className="font-bold text-neutral-900 dark:text-white">{d.rawScore}</span>
+                                  <span className="text-[11px] text-neutral-400 ml-1">
+                                    (+{d.weightedScore.toFixed(1)})
+                                  </span>
+                                </div>
+                              </div>
+
+                              {d.comment ? (
+                                <p className="text-[11px] text-neutral-600 dark:text-neutral-300 italic bg-neutral-50 dark:bg-neutral-800 p-2 rounded border border-neutral-100 dark:border-neutral-800 leading-relaxed">
+                                  &ldquo;{d.comment}&rdquo;
+                                </p>
+                              ) : (
+                                <p className="text-[10px] text-neutral-400 italic">
+                                  (Tidak ada catatan komentar)
+                                </p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
                     </div>
                   );
                 })}

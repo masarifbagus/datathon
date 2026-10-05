@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useTransition } from "react";
 import { logoutAction } from "@/app/actions/auth-actions";
 import { Button } from "./ui/button";
@@ -22,20 +23,32 @@ export function Navbar({ session }: NavbarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-neutral-200 bg-white/95 backdrop-blur-sm dark:border-neutral-800 dark:bg-neutral-950/95">
+    <header className="sticky top-0 z-40 w-full border-b border-neutral-200 bg-white/95 backdrop-blur-sm">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-        {/* Brand */}
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-bold text-sm">
-            L
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-neutral-900 dark:text-white tracking-tight text-sm sm:text-base">
-              LAN DATATHON
-            </span>
-            <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0 border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400">
-              2026
-            </Badge>
+        {/* Brand with Official Logos */}
+        <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group">
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            {/* Logo LAN RI */}
+            <Image
+              src="/logo-lan-dark.png"
+              alt="LAN RI"
+              width={90}
+              height={32}
+              className="h-6 sm:h-7 w-auto object-contain"
+              priority
+            />
+
+            <div className="h-4 w-px bg-neutral-200" />
+
+            {/* Logo LAN Datathon */}
+            <Image
+              src="/logo-lan-datathon.png"
+              alt="LAN Datathon 2026"
+              width={140}
+              height={36}
+              className="h-6 sm:h-7.5 w-auto object-contain"
+              priority
+            />
           </div>
         </Link>
 
@@ -80,11 +93,18 @@ export function Navbar({ session }: NavbarProps) {
               </Button>
             </div>
           ) : (
-            <Link href="/login">
-              <Button size="sm" variant="default" className="text-xs h-8 font-medium">
-                Masuk
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link href="/login">
+                <Button size="sm" variant="default" className="text-xs h-8 font-medium">
+                  Masuk Juri
+                </Button>
+              </Link>
+              <Link href="/admin/login">
+                <Button size="sm" variant="outline" className="text-xs h-8 font-medium text-neutral-600 dark:text-neutral-400">
+                  Admin
+                </Button>
+              </Link>
+            </div>
           )}
         </div>
       </div>

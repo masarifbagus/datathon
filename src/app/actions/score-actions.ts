@@ -11,7 +11,8 @@ export type SubmitScoreResult =
 export async function submitJudgeScoreAction(payload: {
   teamId: string;
   rawScores: Record<string, number>;
-  comment: string;
+  criterionComments?: Record<string, string>;
+  comment?: string;
 }): Promise<SubmitScoreResult> {
   const session = await getSession();
   if (!session) {
@@ -27,7 +28,8 @@ export async function submitJudgeScoreAction(payload: {
       judgeId: session.userId,
       teamId: payload.teamId,
       rawScores: payload.rawScores,
-      comment: payload.comment,
+      criterionComments: payload.criterionComments,
+      comment: payload.comment || "",
     });
 
     revalidatePath("/judge");

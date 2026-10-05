@@ -6,30 +6,23 @@ import Link from "next/link";
 import Image from "next/image";
 import { loginWithCredentialsAction } from "@/app/actions/auth-actions";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowRight, User, Lock, ShieldCheck } from "lucide-react";
+import { Loader2, ArrowRight, ShieldCheck, Lock, User, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
-const QUICK_JUDGE_USERNAMES = ["juri1", "juri2", "juri3", "juri4"];
-
-export function LoginClient() {
+export function AdminLoginClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get("redirect");
 
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("");
   const [isPending, startTransition] = useTransition();
-
-  const handleSelectQuick = (u: string) => {
-    setUsername(u);
-    setPassword("juri123");
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!username.trim()) {
-      toast.error("Silakan masukkan username juri.");
+      toast.error("Silakan masukkan username admin.");
       return;
     }
 
@@ -38,16 +31,16 @@ export function LoginClient() {
         const res = await loginWithCredentialsAction({
           username: username.trim(),
           password: password.trim(),
-          expectedRole: "judge",
+          expectedRole: "admin",
         });
 
         if (res.success && res.redirectUrl) {
-          toast.success(`Berhasil masuk sebagai ${username.toUpperCase()}`);
+          toast.success("Berhasil masuk sebagai Administrator");
           const target = redirectUrl || res.redirectUrl;
           router.push(target);
           router.refresh();
         } else {
-          toast.error(res.error || "Gagal masuk.");
+          toast.error(res.error || "Gagal masuk administrator.");
         }
       } catch (err) {
         console.error(err);
@@ -89,11 +82,15 @@ export function LoginClient() {
         </div>
 
         <div>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-[11px] font-medium text-neutral-500 mb-1.5">
+            <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
+            <span>Portal Khusus Administrator</span>
+          </div>
           <h1 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-white">
-            Login Dewan Juri
+            Login Administrator
           </h1>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-            Masukkan username dan password panelis juri untuk menginput nilai.
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+            Akses dashboard rekapitulasi nilai real-time & ekspor Excel.
           </p>
         </div>
       </div>
@@ -105,7 +102,7 @@ export function LoginClient() {
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-neutral-800 dark:text-neutral-200 flex items-center gap-1.5">
               <User className="h-3.5 w-3.5 text-neutral-400" />
-              <span>Username Juri</span>
+              <span>Username Administrator</span>
             </label>
             <input
               type="text"
@@ -114,32 +111,13 @@ export function LoginClient() {
               autoCorrect="off"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Contoh: juri1, juri2, juri3, juri4"
+              placeholder="admin"
               className="w-full py-2 px-3 text-sm font-mono rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 dark:focus:border-white transition-colors"
             />
           </div>
 
-          {/* Quick Choice Chips */}
-          <div className="flex items-center gap-1.5 pt-0.5">
-            <span className="text-[10px] text-neutral-400 font-mono">Pilih cepat:</span>
-            {QUICK_JUDGE_USERNAMES.map((u) => (
-              <button
-                key={u}
-                type="button"
-                onClick={() => handleSelectQuick(u)}
-                className={`text-[11px] font-mono px-2 py-0.5 rounded border transition-colors cursor-pointer ${
-                  username.toLowerCase() === u
-                    ? "border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-900 font-bold"
-                    : "border-neutral-200 dark:border-neutral-800 text-neutral-500 hover:border-neutral-400"
-                }`}
-              >
-                {u}
-              </button>
-            ))}
-          </div>
-
           {/* Password */}
-          <div className="space-y-1.5 pt-1">
+          <div className="space-y-1.5">
             <label className="text-xs font-semibold text-neutral-800 dark:text-neutral-200 flex items-center gap-1.5">
               <Lock className="h-3.5 w-3.5 text-neutral-400" />
               <span>Password</span>
@@ -152,7 +130,7 @@ export function LoginClient() {
               className="w-full py-2 px-3 text-sm font-mono rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 dark:focus:border-white transition-colors"
             />
             <p className="text-[10px] text-neutral-400 font-mono">
-              Password default: <span className="font-bold text-neutral-600 dark:text-neutral-300">juri123</span>
+              Password default demo: <span className="font-bold text-neutral-600 dark:text-neutral-300">admin123</span>
             </p>
           </div>
 
@@ -160,7 +138,7 @@ export function LoginClient() {
           <Button
             type="submit"
             disabled={isPending}
-            className="w-full font-semibold text-sm h-10 mt-2 cursor-pointer"
+            className="w-full font-semibold text-sm h-10 mt-2 cursor-pointer bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-100"
           >
             {isPending ? (
               <span className="flex items-center gap-2">
@@ -169,7 +147,7 @@ export function LoginClient() {
               </span>
             ) : (
               <span className="flex items-center gap-2">
-                <span>Masuk sebagai Juri</span>
+                <span>Masuk Dashboard Admin</span>
                 <ArrowRight className="h-4 w-4" />
               </span>
             )}
@@ -177,14 +155,14 @@ export function LoginClient() {
         </form>
       </div>
 
-      {/* Admin Portal Switcher */}
+      {/* Back to Judge Portal Switcher */}
       <div className="text-center pt-2">
         <Link
-          href="/admin/login"
+          href="/login"
           className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors"
         >
-          <ShieldCheck className="h-3.5 w-3.5 text-neutral-400" />
-          <span>Akses Administrator Panitia? Masuk ke Portal Admin &rarr;</span>
+          <ArrowLeft className="h-3.5 w-3.5 text-neutral-400" />
+          <span>Bukan Admin? Kembali ke Portal Dewan Juri</span>
         </Link>
       </div>
     </div>

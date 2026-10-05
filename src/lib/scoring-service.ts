@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { prisma } from "./prisma";
 import { DEFAULT_CRITERIA, DEFAULT_TEAMS, DEFAULT_USERS } from "./constants";
 
@@ -34,6 +36,7 @@ export interface ScoreDetailItem {
   weight: number;
   rawScore: number;
   weightedScore: number;
+  comment?: string | null;
 }
 
 export interface JudgeScoreItem {
@@ -57,7 +60,7 @@ export interface TeamLeaderboardRow {
   rank: number;
 }
 
-// Memory Store as robust fallback for immediate testing/preview
+// Local Store for disk persistence during development & fallback
 interface MemoryStore {
   users: UserItem[];
   criteria: CriterionItem[];
@@ -73,19 +76,22 @@ interface MemoryStore {
       criterionId: string;
       rawScore: number;
       weightedScore: number;
+      comment?: string | null;
     }[];
   }>;
 }
 
+const LOCAL_STORE_FILE = path.join(process.cwd(), ".local-scores.json");
+
 const memoryStore: MemoryStore = {
-  users: DEFAULT_USERS.map((u, i) => ({
+  users: DEFAULT_USERS.map((u) => ({
     id: `usr_${u.username}`,
     username: u.username,
     name: u.name,
     role: u.role as "judge" | "admin",
     avatar: u.avatar,
   })),
-  criteria: DEFAULT_CRITERIA.map((c, i) => ({
+  criteria: DEFAULT_CRITERIA.map((c) => ({
     id: `crit_${c.code}`,
     code: c.code,
     name: c.name,
@@ -104,21 +110,64 @@ const memoryStore: MemoryStore = {
   scores: new Map(),
 };
 
-// Seed initial sample scores in memory for instant realistic demo if empty
+function saveScoresToDisk() {
+  try {
+    const serialized = Array.from(memoryStore.scores.entries()).map(([k, v]) => ({
+      key: k,
+      ...v,
+      updatedAt: v.updatedAt.toISOString(),
+    }));
+    fs.writeFileSync(LOCAL_STORE_FILE, JSON.stringify(serialized, null, 2), "utf-8");
+  } catch (err) {
+    console.warn("Could not save local scores to disk:", err);
+  }
+}
+
+function loadScoresFromDisk(): boolean {
+  try {
+    if (fs.existsSync(LOCAL_STORE_FILE)) {
+      const content = fs.readFileSync(LOCAL_STORE_FILE, "utf-8");
+      const list = JSON.parse(content);
+      if (Array.isArray(list) && list.length > 0) {
+        memoryStore.scores.clear();
+        for (const item of list) {
+          memoryStore.scores.set(item.key, {
+            id: item.id,
+            teamId: item.teamId,
+            userId: item.userId,
+            totalWeightedScore: item.totalWeightedScore,
+            comment: item.comment,
+            updatedAt: new Date(item.updatedAt),
+            details: item.details,
+          });
+        }
+        return true;
+      }
+    }
+  } catch (err) {
+    console.warn("Could not load local scores from disk:", err);
+  }
+  return false;
+}
+
+// Initialize scores from disk, or seed initial sample if first run
 function initializeSampleScores() {
+  if (loadScoresFromDisk()) {
+    return;
+  }
+
   if (memoryStore.scores.size === 0) {
-    // Add sample scores for Juri 1 and Juri 2 on Team 1 (Simpul Desa)
     const t1 = memoryStore.teams[0].id;
     const j1 = memoryStore.users.find((u) => u.username === "juri1")!.id;
     const j2 = memoryStore.users.find((u) => u.username === "juri2")!.id;
 
     // Juri 1 for Simpul Desa
     const j1Scores = [
-      { code: "relevansi", raw: 90 },
-      { code: "inovasi", raw: 88 },
-      { code: "teknologi", raw: 92 },
-      { code: "dampak", raw: 95 },
-      { code: "presentasi", raw: 85 },
+      { code: "relevansi", raw: 90, comment: "Sangat relevan dengan isu tata kelola data pemerintahan desa saat ini." },
+      { code: "inovasi", raw: 88, comment: "Pendekatan orisinal berbasis bottom-up data collector." },
+      { code: "teknologi", raw: 92, comment: "Arsitektur cloud serverless efisien dan prototype berjalan tanpa kendala." },
+      { code: "dampak", raw: 95, comment: "Dampak langsung terukur untuk efisiensi alokasi dana desa." },
+      { code: "presentasi", raw: 85, comment: "Penyampaian runtut dan penguasaan materi tim sangat baik." },
     ];
     let j1Total = 0;
     const j1Details = j1Scores.map((s) => {
@@ -129,6 +178,7 @@ function initializeSampleScores() {
         criterionId: crit.id,
         rawScore: s.raw,
         weightedScore: weighted,
+        comment: s.comment,
       };
     });
 
@@ -144,11 +194,11 @@ function initializeSampleScores() {
 
     // Juri 2 for Simpul Desa
     const j2Scores = [
-      { code: "relevansi", raw: 88 },
-      { code: "inovasi", raw: 85 },
-      { code: "teknologi", raw: 90 },
-      { code: "dampak", raw: 92 },
-      { code: "presentasi", raw: 88 },
+      { code: "relevansi", raw: 88, comment: "Kebutuhan pemda terjawab dengan baik melalui modul analitik." },
+      { code: "inovasi", raw: 85, comment: "Perlu diferensiasi lebih kuat dibanding sistem eksisting." },
+      { code: "teknologi", raw: 90, comment: "Fungsionalitas dashboard rapi, performa responsif." },
+      { code: "dampak", raw: 92, comment: "Potensi replikasi tinggi ke seluruh kabupaten/kota." },
+      { code: "presentasi", raw: 88, comment: "Tanya jawab dijawab dengan lugas dan berbasis data konkret." },
     ];
     let j2Total = 0;
     const j2Details = j2Scores.map((s) => {
@@ -159,6 +209,7 @@ function initializeSampleScores() {
         criterionId: crit.id,
         rawScore: s.raw,
         weightedScore: weighted,
+        comment: s.comment,
       };
     });
 
@@ -171,6 +222,8 @@ function initializeSampleScores() {
       updatedAt: new Date(),
       details: j2Details,
     });
+
+    saveScoresToDisk();
   }
 }
 
@@ -313,6 +366,7 @@ export async function getJudgeScoresMap(judgeId: string): Promise<Record<string,
             weight: d.criterion.weight,
             rawScore: d.rawScore,
             weightedScore: Number(d.weightedScore.toFixed(2)),
+            comment: d.comment || "",
           })),
         };
       }
@@ -347,6 +401,7 @@ export async function getJudgeScoresMap(judgeId: string): Promise<Record<string,
             weight: crit?.weight || 0,
             rawScore: d.rawScore,
             weightedScore: Number(d.weightedScore.toFixed(2)),
+            comment: d.comment || "",
           };
         }),
       };
@@ -360,9 +415,10 @@ export async function saveJudgeScore(params: {
   judgeId: string;
   teamId: string;
   rawScores: Record<string, number>; // criterionId or code -> 0..100
-  comment: string;
+  criterionComments?: Record<string, string>; // criterionId or code -> comment
+  comment?: string;
 }): Promise<{ success: boolean; totalWeightedScore: number; message?: string }> {
-  const { judgeId, teamId, rawScores, comment } = params;
+  const { judgeId, teamId, rawScores, criterionComments = {}, comment = "" } = params;
   const criteria = await getCriteria();
 
   // Calculate weighted scores
@@ -371,17 +427,20 @@ export async function saveJudgeScore(params: {
     criterionId: string;
     rawScore: number;
     weightedScore: number;
+    comment: string;
   }[] = [];
 
   for (const crit of criteria) {
     const raw = Number(rawScores[crit.id] ?? rawScores[crit.code] ?? 0);
     const clampedRaw = Math.max(0, Math.min(100, isNaN(raw) ? 0 : raw));
     const weighted = Number((clampedRaw * crit.weight).toFixed(2));
+    const critComment = criterionComments[crit.id] || criterionComments[crit.code] || "";
     total += weighted;
     detailsToSave.push({
       criterionId: crit.id,
       rawScore: clampedRaw,
       weightedScore: weighted,
+      comment: critComment.trim(),
     });
   }
 
@@ -422,12 +481,14 @@ export async function saveJudgeScore(params: {
             update: {
               rawScore: detail.rawScore,
               weightedScore: detail.weightedScore,
+              comment: detail.comment,
             },
             create: {
               scoreId: score.id,
               criterionId: detail.criterionId,
               rawScore: detail.rawScore,
               weightedScore: detail.weightedScore,
+              comment: detail.comment,
             },
           });
         }
@@ -439,7 +500,7 @@ export async function saveJudgeScore(params: {
     }
   }
 
-  // Memory store fallback
+  // Local store fallback with disk persistence
   const scoreKey = `${teamId}_${judgeId}`;
   memoryStore.scores.set(scoreKey, {
     id: `score_${scoreKey}`,
@@ -450,6 +511,8 @@ export async function saveJudgeScore(params: {
     updatedAt: new Date(),
     details: detailsToSave,
   });
+
+  saveScoresToDisk();
 
   return { success: true, totalWeightedScore: finalWeightedTotal };
 }
@@ -499,6 +562,7 @@ export async function getAdminLeaderboard(): Promise<{
             weight: d.criterion.weight,
             rawScore: d.rawScore,
             weightedScore: Number(d.weightedScore.toFixed(2)),
+            comment: d.comment || "",
           })),
         });
       }
@@ -529,6 +593,7 @@ export async function getAdminLeaderboard(): Promise<{
             weight: crit?.weight || 0,
             rawScore: d.rawScore,
             weightedScore: Number(d.weightedScore.toFixed(2)),
+            comment: d.comment || "",
           };
         }),
       });

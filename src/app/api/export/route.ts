@@ -190,7 +190,11 @@ export async function GET() {
       "Dampak (30%)",
       "Presentasi (10%)",
       "TOTAL TERBOBOT",
-      "KOMENTAR / SARAN JURI",
+      "KOMENTAR RELEVANSI",
+      "KOMENTAR INOVASI",
+      "KOMENTAR TEKNOLOGI",
+      "KOMENTAR DAMPAK",
+      "KOMENTAR PRESENTASI",
     ];
 
     detailHeaders.forEach((h, colIdx) => {
@@ -210,12 +214,14 @@ export async function GET() {
         worksheetDetail[XLSX.utils.encode_cell({ c: 2, r: detailRowIdx })] = { t: "s", v: j.name };
 
         if (scoreItem) {
-          const detailMap = new Map(scoreItem.details.map((d) => [d.criterionCode, d.rawScore]));
-          const scoreRelevansi = detailMap.get("relevansi") ?? 0;
-          const scoreInovasi = detailMap.get("inovasi") ?? 0;
-          const scoreTeknologi = detailMap.get("teknologi") ?? 0;
-          const scoreDampak = detailMap.get("dampak") ?? 0;
-          const scorePresentasi = detailMap.get("presentasi") ?? 0;
+          const scoreMap = new Map(scoreItem.details.map((d) => [d.criterionCode, d.rawScore]));
+          const commentMap = new Map(scoreItem.details.map((d) => [d.criterionCode, d.comment || "-"]));
+
+          const scoreRelevansi = scoreMap.get("relevansi") ?? 0;
+          const scoreInovasi = scoreMap.get("inovasi") ?? 0;
+          const scoreTeknologi = scoreMap.get("teknologi") ?? 0;
+          const scoreDampak = scoreMap.get("dampak") ?? 0;
+          const scorePresentasi = scoreMap.get("presentasi") ?? 0;
 
           worksheetDetail[XLSX.utils.encode_cell({ c: 3, r: detailRowIdx })] = { t: "n", v: scoreRelevansi };
           worksheetDetail[XLSX.utils.encode_cell({ c: 4, r: detailRowIdx })] = { t: "n", v: scoreInovasi };
@@ -235,7 +241,23 @@ export async function GET() {
 
           worksheetDetail[XLSX.utils.encode_cell({ c: 9, r: detailRowIdx })] = {
             t: "s",
-            v: scoreItem.comment || "-",
+            v: commentMap.get("relevansi") || "-",
+          };
+          worksheetDetail[XLSX.utils.encode_cell({ c: 10, r: detailRowIdx })] = {
+            t: "s",
+            v: commentMap.get("inovasi") || "-",
+          };
+          worksheetDetail[XLSX.utils.encode_cell({ c: 11, r: detailRowIdx })] = {
+            t: "s",
+            v: commentMap.get("teknologi") || "-",
+          };
+          worksheetDetail[XLSX.utils.encode_cell({ c: 12, r: detailRowIdx })] = {
+            t: "s",
+            v: commentMap.get("dampak") || "-",
+          };
+          worksheetDetail[XLSX.utils.encode_cell({ c: 13, r: detailRowIdx })] = {
+            t: "s",
+            v: commentMap.get("presentasi") || "-",
           };
         } else {
           worksheetDetail[XLSX.utils.encode_cell({ c: 3, r: detailRowIdx })] = { t: "s", v: "-" };
@@ -244,7 +266,11 @@ export async function GET() {
           worksheetDetail[XLSX.utils.encode_cell({ c: 6, r: detailRowIdx })] = { t: "s", v: "-" };
           worksheetDetail[XLSX.utils.encode_cell({ c: 7, r: detailRowIdx })] = { t: "s", v: "-" };
           worksheetDetail[XLSX.utils.encode_cell({ c: 8, r: detailRowIdx })] = { t: "s", v: "-" };
-          worksheetDetail[XLSX.utils.encode_cell({ c: 9, r: detailRowIdx })] = {
+          worksheetDetail[XLSX.utils.encode_cell({ c: 9, r: detailRowIdx })] = { t: "s", v: "-" };
+          worksheetDetail[XLSX.utils.encode_cell({ c: 10, r: detailRowIdx })] = { t: "s", v: "-" };
+          worksheetDetail[XLSX.utils.encode_cell({ c: 11, r: detailRowIdx })] = { t: "s", v: "-" };
+          worksheetDetail[XLSX.utils.encode_cell({ c: 12, r: detailRowIdx })] = { t: "s", v: "-" };
+          worksheetDetail[XLSX.utils.encode_cell({ c: 13, r: detailRowIdx })] = {
             t: "s",
             v: "(Belum memberikan nilai)",
           };
@@ -256,20 +282,24 @@ export async function GET() {
 
     worksheetDetail["!ref"] = XLSX.utils.encode_range({
       s: { c: 0, r: 0 },
-      e: { c: 9, r: detailRowIdx },
+      e: { c: 13, r: detailRowIdx },
     });
 
     worksheetDetail["!cols"] = [
       { wch: 6 },  // NO
       { wch: 22 }, // NAMA TIM
       { wch: 16 }, // JURI
-      { wch: 16 }, // Relevansi
-      { wch: 16 }, // Inovasi
-      { wch: 16 }, // Teknologi
-      { wch: 16 }, // Dampak
-      { wch: 16 }, // Presentasi
-      { wch: 20 }, // TOTAL TERBOBOT
-      { wch: 60 }, // KOMENTAR
+      { wch: 15 }, // Relevansi
+      { wch: 15 }, // Inovasi
+      { wch: 15 }, // Teknologi
+      { wch: 15 }, // Dampak
+      { wch: 15 }, // Presentasi
+      { wch: 18 }, // TOTAL TERBOBOT
+      { wch: 32 }, // KOMENTAR RELEVANSI
+      { wch: 32 }, // KOMENTAR INOVASI
+      { wch: 32 }, // KOMENTAR TEKNOLOGI
+      { wch: 32 }, // KOMENTAR DAMPAK
+      { wch: 32 }, // KOMENTAR PRESENTASI
     ];
 
     // ==========================================
